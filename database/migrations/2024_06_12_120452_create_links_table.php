@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('original_url');
             $table->string('shortener_url');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->integer('count')->default(0);
             $table->timestamps();
         });
     }
