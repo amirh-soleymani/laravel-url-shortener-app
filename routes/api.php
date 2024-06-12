@@ -18,9 +18,11 @@ use App\Http\Controllers\LinkController;
 Route::prefix('link')->group(function(){
 
     Route::post('create', [LinkController::class, 'create']);
-    Route::get('mostClickedLinks', [LinkController::class, 'mostClickedLinks']);
-    Route::get('linksByUser/{userId}', [LinkController::class, 'linksByUser']);
-    //Route::post('')
+    Route::get('mostClickedLinks/{size}', [LinkController::class, 'mostClickedLinks']);
+    Route::get('linksByUser/{user}', [LinkController::class, 'linksByUser']);
+    Route::get('search/{query}', [LinkController::class, 'search']);
+
 });
 
+Route::get('/{query}', [LinkController::class, 'load']);
 
