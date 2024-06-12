@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LinkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('link')->group(function(){
+
+    Route::post('create', [LinkController::class, 'create']);
+    Route::get('mostClickedLinks', [LinkController::class, 'mostClickedLinks']);
+    Route::get('linksByUser/{userId}', [LinkController::class, 'linksByUser']);
+    //Route::post('')
 });
+
+
