@@ -12,6 +12,13 @@ use Predis\Client;
 
 class LinkController extends BaseController
 {
+    protected $redisClient;
+
+    public function __construct()
+    {
+        $this->redisClient = Client();
+    }
+
     public function create(LinkRequest $linkRequest)
     {
         $originalLink = $linkRequest->get('link');
