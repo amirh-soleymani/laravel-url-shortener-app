@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LinkRequest;
 use App\Models\Link;
+use App\Repositories\LinkRepository;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Redirect;
@@ -13,10 +14,12 @@ use Predis\Client;
 class LinkController extends BaseController
 {
     protected $redisClient;
+    protected $linkRepository;
 
-    public function __construct()
+    public function __construct(Client $client, LinkRepository $linkRepository)
     {
-        $this->redisClient = Client();
+        $this->redisClient = $client;
+        $this->linkRepository = $linkRepository;
     }
 
     public function create(LinkRequest $linkRequest)
@@ -28,29 +31,26 @@ class LinkController extends BaseController
         while ($linkStringCreationFlag) {
             $shortenerLink = Str::random(5);
 
-            $checkShortenerLinkExist = Link::where('shortener_url', $shortenerLink)
-                ->exists();
+            $checkShortenerLinkExist = $this->linkRepository->checkExistsByShortenerUrl($shortenerLink);
             if (!$checkShortenerLinkExist) {
                 $linkStringCreationFlag = false;
             }
         }
-        $link = Link::create([
-            'shortener_url' => $shortenerLink,
+
+        $link = $this->linkRepository->createLink([
             'original_url' => $originalLink,
+            'shortener_url' => $shortenerLink,
             'user_id' => $user
         ]);
 
-        $redisClient = new Client();
-        $redisClient->set($shortenerLink, $originalLink);
+        $this->redisClient->set($shortenerLink, $originalLink);
 
         return $this->responseSuccess(array($link), 'Link Created Successfully');
     }
 
     public function mostClickedLinks($size)
     {
-        $links = Link::orderBy('count', 'DESC')
-            ->take($size)
-            ->get();
+        $links = $this->linkRepository->getMostClickedLinks($size);
 
         return $this->responseSuccess(array($links), 'Done');
     }
