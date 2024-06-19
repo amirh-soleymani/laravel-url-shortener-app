@@ -13,7 +13,7 @@ class LinkRepository
 
     public function getByOriginalUrl($originalUrl)
     {
-        return Link::where('original_url', $originalUrl)
+        return Link::where('original_url', 'like', '%' . $originalUrl . '%')
             ->first();
     }
 
@@ -21,6 +21,12 @@ class LinkRepository
     {
         return Link::where('shortener_url', $shortenerUrl)
             ->first();
+    }
+
+    public function getByUser($userId)
+    {
+        return Link::where('user_id', $userId)
+            ->get();
     }
 
     public function getMostClickedLinks($size)
@@ -39,9 +45,9 @@ class LinkRepository
     public function createLink(array $data = [])
     {
         $link = new Link();
-        $link->original_url($data['original_url']);
-        $link->shortener_url($data['shortener_url']);
-        $link->user_id($data['user_id']);
+        $link->original_url = $data['original_url'];
+        $link->shortener_url =$data['shortener_url'];
+        $link->user_id = $data['user_id'];
 
         if (! $link->save()) {
             return null;
