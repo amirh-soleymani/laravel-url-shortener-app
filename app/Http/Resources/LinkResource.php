@@ -18,11 +18,12 @@ class LinkResource extends JsonResource
             'id' => $this->id,
             'original_url' => $this->original_url,
             'shortener_url' => $this->shortener_url,
+            'count' => $this->count,
             'user' => [
                 'name' => $this->user->name,
                 'email' => $this->user->email,
             ],
-            'count' => $this->count,
+
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LinkRequest;
+use App\Http\Resources\LinkResource;
 use App\Models\Link;
 use App\Repositories\LinkRepository;
 use Illuminate\Http\Request;
@@ -40,40 +41,37 @@ class LinkController extends BaseController
         $link = $this->linkRepository->createLink([
             'original_url' => $originalLink,
             'shortener_url' => $shortenerLink,
-            'user_id' => $user
+            'user_id' => $user,
         ]);
 
         $this->redisClient->set($shortenerLink, $originalLink);
 
-        return $this->responseSuccess(array($link), 'Link Created Successfully');
+        return $this->responseSuccess(LinkResource::make($link), 'Link Created Successfully');
     }
 
     public function mostClickedLinks($size)
     {
         $links = $this->linkRepository->getMostClickedLinks($size);
 
-        return $this->responseSuccess(array($links), 'Done');
+        return $this->responseSuccess(LinkResource::collection($links), 'Done');
     }
 
     public function linksByUser($user)
     {
-        $links = Link::where('user_id', $user)
-            ->get();
+        $links = $this->linkRepository->getByUser($user);
 
-        return $this->responseSuccess(array($links), 'Done');
+        return $this->responseSuccess(LinkResource::collection($links), 'Done');
     }
 
     public function load($query)
     {
-        $redisClient = new Client();
-        $originalLink = $redisClient->get($query);
+        $originalLink = $this->redisClient->get($query);
         if ($originalLink == '') {
             return $this->responseError("Url Not Found!");
         }
 
         ////// This Section Should Move to Background (Event)
-            $link = Link::where('shortener_url', $query)
-                ->first();
+            $link = $this->linkRepository->getByShortenerUrl($query);
             if ($link) {
                 $link->increment('count');
                 $link->save();
@@ -84,9 +82,11 @@ class LinkController extends BaseController
 
     public function search($query)
     {
-        $link = Link::where('original_url', 'like', '%' . $query . '%')
-            ->first();
+        $link = $this->linkRepository->getByOriginalUrl($query);
+        if (! $link) {
+            return $this->responseError('No Related Links Found!');
+        }
 
-        return $this->responseSuccess(array($link), 'Done');
+        return $this->responseSuccess(LinkResource::make($link), 'Done');
     }
 }
