@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class BaseController extends Controller
 {
-    public function responseSuccess(array $data, $message = null)
+    public function responseSuccess(JsonResource $data, $message = null)
     {
         return response()->json([
             'success' => true,
