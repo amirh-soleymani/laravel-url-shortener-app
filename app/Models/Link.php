@@ -18,6 +18,12 @@ class Link extends Model
         'original_url',
         'shortener_url',
         'user_id',
+        'count'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }
